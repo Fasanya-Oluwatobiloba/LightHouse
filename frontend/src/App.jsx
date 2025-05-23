@@ -3,7 +3,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home"
-import Sermons from "./pages/Sermon";
+import Sermons from "./pages/sermon";
 import SermonDetail from "./pages/SermonDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";

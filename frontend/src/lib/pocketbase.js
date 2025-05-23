@@ -1,7 +1,6 @@
 import PocketBase from 'pocketbase';
 
-const pb = new PocketBase(import.meta.env.VITE_POCKETBASE_URL);
-
+const pb = new PocketBase('http://127.0.0.1:8090');
 
 // Enhanced auth persistence
 pb.authStore.onChange((token, model) => {

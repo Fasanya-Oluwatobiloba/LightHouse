@@ -59,22 +59,20 @@ export default function Sermons() {
     setShowModal(true);
   };
 
-  const handleDeleteConfirmed = async () => {
-    try {
-      await pb.collection("sermons").delete(sermonToDelete);
-      setSermons((prev) =>
-        prev.filter((sermon) => sermon.id !== sermonToDelete)
-      );
-      setFilteredSermons((prev) =>
-        prev.filter((sermon) => sermon.id !== sermonToDelete)
-      );
+  const handleDeleteConfirmed = async (id) => {
+  try {
+    const success = await SermonService.delete(id);
+    if (success) {
+      await loadSermons(); // Refresh sermons after deletion
       setShowModal(false);
       setSermonToDelete(null);
-    } catch (err) {
-      console.error("Error deleting sermon:", err);
-      alert(`Failed to delete sermon: ${err.message}`);
     }
-  };
+  } catch (error) {
+    console.error("Delete failed:", error);
+    setError(error.message);
+    setShowModal(false);
+  }
+};
 
   useEffect(() => {
     const filtered = sermons.filter(
@@ -245,7 +243,7 @@ export default function Sermons() {
                 No
               </button>
               <button
-                onClick={handleDeleteConfirmed}
+                onClick={() => handleDeleteConfirmed(sermonToDelete)}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
                 Yes, Delete

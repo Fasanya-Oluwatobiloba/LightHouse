@@ -2,9 +2,9 @@
 export default function YearSelector({ years, onSelectYear }) {
   // Map years to image paths
   const yearImages = {
-    2023: '/images/years/2023.jpg',
-    2024: '/images/years/2024.jpg',
-    2025: '/images/years/2025.jpg',
+    2023: '../../assets/toby.jpg',
+    2024: '../../assets/toby.jpg',
+    2025: '../../assets/toby.jpg',
     // Add more years as needed
   };
 

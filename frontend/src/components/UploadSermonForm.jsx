@@ -1,17 +1,28 @@
-import { useState, forwardRef, useImperativeHandle } from 'react';
-import { FiUpload, FiFileText, FiCalendar, FiUser, FiClock } from 'react-icons/fi';
+// components/UploadSermonForm.jsx
+import { forwardRef, useImperativeHandle, useState } from 'react';
+import { FiUpload, FiFileText, FiUser, FiClock } from 'react-icons/fi';
 
-const UploadSermonForm = forwardRef(({ onSubmit, loading = false }, ref) => {
+const UploadSermonForm = forwardRef(({ onSubmit, loading }, ref) => {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  
+  // Generate years from current year to 2023
+  const years = Array.from(
+    { length: currentYear - 2022 }, 
+    (_, i) => currentYear - i
+  );
+
   const [formData, setFormData] = useState({
     title: '',
     preacher: '',
-    date: new Date().toISOString().split('T')[0],
+    year: currentYear,
+    month: currentDate.getMonth() + 1,
+    day: currentDate.getDate(),
     description: '',
     duration: '00:00',
     audioFile: null,
     imageFile: null
   });
-  const [formKey, setFormKey] = useState(0);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,20 +35,29 @@ const UploadSermonForm = forwardRef(({ onSubmit, loading = false }, ref) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Construct date in YYYY-MM-DD format
+    const formattedDate = `${formData.year}-${String(formData.month).padStart(2, '0')}-${String(formData.day).padStart(2, '0')}`;
+    
+    onSubmit({
+      ...formData,
+      date: formattedDate
+    });
   };
 
-  // Add method to reset form
   const resetForm = () => {
     setFormData({
       title: '',
       preacher: '',
-      date: new Date().toISOString().split('T')[0],
+      year: currentYear,
+      month: currentDate.getMonth() + 1,
+      day: currentDate.getDate(),
       description: '',
       duration: '00:00',
       audioFile: null,
       imageFile: null
     });
+    
     // Reset file inputs
     if (document.getElementById('audioFile')) {
       document.getElementById('audioFile').value = '';
@@ -47,10 +67,14 @@ const UploadSermonForm = forwardRef(({ onSubmit, loading = false }, ref) => {
     }
   };
 
-  // Expose resetForm to parent component
   useImperativeHandle(ref, () => ({
     resetForm
   }));
+
+  // Get days in selected month
+  const getDaysInMonth = () => {
+    return new Date(formData.year, formData.month, 0).getDate();
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -86,19 +110,57 @@ const UploadSermonForm = forwardRef(({ onSubmit, loading = false }, ref) => {
         />
       </div>
 
-      {/* Date Field */}
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <FiCalendar className="h-5 w-5 text-gray-400" />
+      {/* Date Selection */}
+      <div className="grid grid-cols-3 gap-4">
+        {/* Year Select */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+          <select
+            name="year"
+            value={formData.year}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            required
+          >
+            {years.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
         </div>
-        <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          required
-        />
+
+        {/* Month Select */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+          <select
+            name="month"
+            value={formData.month}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            required
+          >
+            {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+              <option key={month} value={month}>
+                {new Date(2000, month - 1, 1).toLocaleString('default', { month: 'long' })}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Day Select */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
+          <select
+            name="day"
+            value={formData.day}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            required
+          >
+            {Array.from({ length: getDaysInMonth() }, (_, i) => i + 1).map(day => (
+              <option key={day} value={day}>{day}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Duration Field */}
@@ -138,13 +200,13 @@ const UploadSermonForm = forwardRef(({ onSubmit, loading = false }, ref) => {
         <label className="cursor-pointer">
           <span className="text-blue-600 font-medium">Choose an audio file</span> or drag it here
           <input
-        id="audioFile"
-        type="file"
-        onChange={(e) => handleFileChange(e, 'audioFile')}
-        className="hidden"
-        accept="audio/*"
-        required
-      />
+            id="audioFile"
+            type="file"
+            onChange={(e) => handleFileChange(e, 'audioFile')}
+            className="hidden"
+            accept="audio/*"
+            required
+          />
         </label>
         {formData.audioFile && (
           <p className="mt-2 text-sm text-gray-600">{formData.audioFile.name}</p>
@@ -159,12 +221,12 @@ const UploadSermonForm = forwardRef(({ onSubmit, loading = false }, ref) => {
         <label className="cursor-pointer">
           <span className="text-blue-600 font-medium">Choose a cover image</span> (optional)
           <input
-        id="imageFile"
-        type="file"
-        onChange={(e) => handleFileChange(e, 'imageFile')}
-        className="hidden"
-        accept="image/*"
-      />
+            id="imageFile"
+            type="file"
+            onChange={(e) => handleFileChange(e, 'imageFile')}
+            className="hidden"
+            accept="image/*"
+          />
         </label>
         {formData.imageFile && (
           <p className="mt-2 text-sm text-gray-600">{formData.imageFile.name}</p>

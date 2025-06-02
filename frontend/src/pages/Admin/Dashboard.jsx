@@ -1,177 +1,82 @@
+// pages/Admin/Dashboard.jsx
 import { useState, useEffect, useRef } from "react";
 import UploadSermonForm from "../../components/UploadSermonForm";
 import { FiUploadCloud } from "react-icons/fi";
 import { SermonService } from "../../services/sermon";
 import pb from "../../lib/pocketbase";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 export default function Dashboard() {
-  const [sermons, setSermons] = useState([]);
   const [recentUploads, setRecentUploads] = useState([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [stats, setStats] = useState({
-    total: 0,
-    thisMonth: 0,
-    preachers: 0,
-  });
-
+  const [error, setError] = useState(null);
   const uploadFormRef = useRef();
   const navigate = useNavigate();
-  const subscriptionRef = useRef(null);
-
-  const updateStats = (sermons) => {
-    const now = new Date();
-    const thisMonthSermons = sermons.filter((s) => {
-      const sermonDate = new Date(s.date);
-      return (
-        sermonDate.getMonth() === now.getMonth() &&
-        sermonDate.getFullYear() === now.getFullYear()
-      );
-    });
-
-    setStats({
-      total: sermons.length,
-      thisMonth: thisMonthSermons.length,
-      preachers: [...new Set(sermons.map((s) => s.preacher))].length,
-    });
-  };
-
-  // Load recent sermons on mount
-  useEffect(() => {
-    const loadSermons = async () => {
-      try {
-        console.log("Current auth state:", {
-          isValid: pb.authStore.isValid,
-          model: pb.authStore.record,
-          token: pb.authStore.token
-        });
-
-        const data = await SermonService.getAll();
-        
-        if (!Array.isArray(data)) {
-          throw new Error("Invalid data format received from server");
-        }
-
-        setSermons(data);
-        setRecentUploads(data.slice(0, 5));
-        updateStats(data);
-        setIsAdmin(pb.authStore.record?.admin || false);
-      } catch (err) {
-        console.error("Load error:", {
-          message: err.message,
-          status: err.status,
-          response: err.response,
-          stack: err.stack
-        });
-
-        if (err.message.includes('expired') || err.status === 401) {
-          pb.authStore.clear();
-          navigate('/admin/login');
-        }
-      }
-    };
-
-    const setupRealtime = async () => {
-      try {
-        await loadSermons();
-
-        // Store the subscription in our ref
-        subscriptionRef.current = pb.collection('sermons').subscribe('*', (e) => {
-          if (e.action === 'create') {
-            setRecentUploads(prev => [e.record, ...prev.slice(0, 4)]);
-            setSermons(prev => [e.record, ...prev]);
-          }
-        });
-      } catch (error) {
-        console.error('Realtime setup failed:', error);
-      }
-    };
-
-    const authUnsubscribe = pb.authStore.onChange(() => {
-      setIsAdmin(pb.authStore.record?.admin || false);
-    });
-
-    setupRealtime();
-
-    return () => {
-      // Proper cleanup of subscriptions
-      if (subscriptionRef.current) {
-        pb.collection('sermons').unsubscribe(subscriptionRef.current);
-      }
-      if (authUnsubscribe) {
-        authUnsubscribe();
-      }
-    };
-  }, [navigate]);
 
   const handleSubmit = async (formData) => {
     setLoading(true);
+    setError(null);
     setSuccess(false);
 
     try {
-      console.log("Current auth state:", pb.authStore.isValid, pb.authStore.model);
-
+      // Verify authentication
       if (!pb.authStore.isValid) {
-        throw new Error("Not authenticated. Please login again.");
+        throw new Error("Session expired. Please login again.");
       }
 
+      // Validate required fields
+      if (!formData.title || !formData.preacher || !formData.date || !formData.audioFile) {
+        throw new Error("Title, preacher, date, and audio file are required");
+      }
+
+      // Create FormData
       const data = new FormData();
       data.append("title", formData.title);
       data.append("preacher", formData.preacher);
       data.append("date", formData.date);
       data.append("description", formData.description || "");
       data.append("duration", formData.duration || "00:00");
-
-      if (!formData.audioFile) {
-        throw new Error("Audio file is required");
-      }
       data.append("audio_file", formData.audioFile);
 
       if (formData.imageFile) {
-        if (formData.imageFile.size > 5 * 1024 * 1024) {
-          throw new Error("Cover image must be less than 5MB");
-        }
         data.append("cover_image", formData.imageFile);
       }
 
+      // Upload the sermon
       const newSermon = await SermonService.upload(data);
-      console.log("Upload response:", newSermon);
-
+      
+      // Update recent uploads
       setRecentUploads(prev => [newSermon, ...prev.slice(0, 4)]);
       setSuccess(true);
-
-      const updatedSermons = await SermonService.getAll();
-      updateStats(updatedSermons);
-
+      
+      // Reset form
       if (uploadFormRef.current) {
         uploadFormRef.current.resetForm();
       }
+
     } catch (err) {
-      console.error("Full upload error:", {
-        message: err.message,
-        status: err.status,
-        response: err.response,
-        stack: err.stack
-      });
-
-      let errorMessage = err.message;
-      if (err.status === 400) {
-        errorMessage = "Invalid data. Please check your inputs.";
-      } else if (err.status === 401) {
-        errorMessage = "Session expired. Please login again.";
-        pb.authStore.clear();
-        navigate("/admin/login");
-      } else if (err.status === 413) {
-        errorMessage = "File too large. Maximum size is 50MB.";
-      }
-
-      alert(`Upload failed: ${errorMessage}`);
+      console.error("Upload failed:", err);
+      setError(err.message || "Upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  // Load recent sermons on mount
+  useEffect(() => {
+    const loadRecentSermons = async () => {
+      try {
+        const sermons = await SermonService.getAll();
+        setRecentUploads(sermons.slice(0, 5));
+      } catch (err) {
+        console.error("Failed to load recent sermons:", err);
+      }
+    };
+    
+    loadRecentSermons();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -195,6 +100,12 @@ export default function Dashboard() {
                   Upload New Sermon
                 </h2>
               </div>
+
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 text-red-800 rounded-lg border border-red-200">
+                  {error}
+                </div>
+              )}
 
               {success && (
                 <div className="mb-6 p-4 bg-green-50 text-green-800 rounded-lg border border-green-200">
@@ -233,35 +144,11 @@ export default function Dashboard() {
                         {upload.preacher} •{" "}
                         {new Date(upload.date).toLocaleDateString()}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Duration: {upload.duration}
-                      </p>
                     </li>
                   ))}
                 </ul>
               )}
             </div>
-          </div>
-        </div>
-        {/* Stats Section */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-gray-500 text-sm font-medium">Total Sermons</h3>
-            <p className="text-2xl font-bold text-gray-900 mt-2">
-              {stats.total}
-            </p>
-          </div>
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-gray-500 text-sm font-medium">This Month</h3>
-            <p className="text-2xl font-bold text-gray-900 mt-2">
-              {stats.thisMonth}
-            </p>
-          </div>
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-gray-500 text-sm font-medium">Preachers</h3>
-            <p className="text-2xl font-bold text-gray-900 mt-2">
-              {stats.preachers}
-            </p>
           </div>
         </div>
       </div>

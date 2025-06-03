@@ -14,7 +14,7 @@ export function useAuth() {
     setError(null);
     try {
       const authData = await pb
-        .collection("_superusers")
+        .collection("users")
         .authWithPassword(email, password);
       console.log("Login successful, authStore:", pb.authStore); // Add this line
       pb.authStore.onChange(() => {}, true); // Optional if already synced

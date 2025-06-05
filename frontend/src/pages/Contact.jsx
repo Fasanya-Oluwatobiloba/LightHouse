@@ -263,23 +263,6 @@ export default function Contact() {
           </div>
         </div>
       </section>
-      
-      {/* Map Section */}
-      <section className="pb-20">
-        <div className="container mx-auto px-6">
-          <motion.div
-            className="h-96 w-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <div className="h-full w-full flex items-center justify-center text-gray-500">
-              <p>Google Map would be embedded here</p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
     </div>
   );
 }

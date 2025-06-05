@@ -79,40 +79,6 @@ export default function Navbar() {
                 }`}></span>
               </NavLink>
             ))}
-
-            {/* Year Selector Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={toggleYearDropdown}
-                className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
-              >
-                <span>Archive</span>
-                <FiChevronDown className={`ml-1 transition-transform ${yearDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {yearDropdownOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute left-0 mt-2 w-40 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
-                >
-                  <div className="py-1">
-                    {years.map((year) => (
-                      <Link
-                        key={year}
-                        to={`/sermons?year=${year}`}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                        onClick={() => setYearDropdownOpen(false)}
-                      >
-                        {year}
-                      </Link>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </div>
             
             {user ? (
               <div className="flex items-center space-x-4 ml-4">

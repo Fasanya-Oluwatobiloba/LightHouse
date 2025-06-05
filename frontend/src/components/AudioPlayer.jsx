@@ -63,10 +63,10 @@ export default function AudioPlayer({ audioUrl }) {
     <div className="bg-gray-100 rounded-lg p-4">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
       
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center mb-3">
         <button 
           onClick={togglePlay}
-          className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700"
+          className="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700"
         >
           {isPlaying ? <FaPause /> : <FaPlay className="ml-1" />}
         </button>
@@ -82,7 +82,7 @@ export default function AudioPlayer({ audioUrl }) {
           />
         </div>
         
-        <div className="text-sm text-gray-600 w-16 text-right">
+        <div className="text-sm text-gray-600 w-20 text-right">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>

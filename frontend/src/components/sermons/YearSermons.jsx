@@ -5,6 +5,8 @@ import { SermonService } from '../../services/sermon';
 import LoadingSpinner from '../LoadingSpinner';
 import AnimatedText from '../AnimatedText';
 import SermonCard from '../SermonCard';
+import { useAuth } from '../../contexts/AuthContext';
+import DeleteConfirmationModal from '../DeleteConfirmationModal';
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -16,6 +18,12 @@ export default function YearSermons() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [sermons, setSermons] = useState([]);
+  const { isAuthenticated } = useAuth();
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    sermonId: null,
+    sermonTitle: ''
+  });
 
   useEffect(() => {
     const loadSermons = async () => {
@@ -28,6 +36,39 @@ export default function YearSermons() {
     };
     loadSermons();
   }, [year]);
+
+  const handleDeleteClick = (sermonId, sermonTitle) => {
+    setDeleteModal({
+      isOpen: true,
+      sermonId,
+      sermonTitle
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await SermonService.delete(deleteModal.sermonId);
+      setSermons(prevSermons => 
+        prevSermons.filter(sermon => sermon.id !== deleteModal.sermonId)
+      );
+      setDeleteModal({
+        isOpen: false,
+        sermonId: null,
+        sermonTitle: ''
+      });
+    } catch (error) {
+      console.error('Failed to delete sermon:', error);
+      alert('Failed to delete sermon. Please try again.');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({
+      isOpen: false,
+      sermonId: null,
+      sermonTitle: ''
+    });
+  };
 
   if (loading) {
     return (
@@ -51,6 +92,13 @@ export default function YearSermons() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        itemName={deleteModal.sermonTitle}
+      />
+
       <div className="flex items-center mb-8">
         <button 
           onClick={() => navigate('/sermons')}
@@ -72,7 +120,7 @@ export default function YearSermons() {
       ) : (
         <div className="space-y-8">
           {Object.keys(sermonsByMonth)
-            .sort((a, b) => b - a) // Sort months in descending order
+            .sort((a, b) => b - a)
             .map((month) => (
               <div key={month} className="space-y-4">
                 <h2 className="text-xl font-semibold text-gray-700 border-b pb-2">
@@ -86,6 +134,7 @@ export default function YearSermons() {
                       sermon={sermon} 
                       audioUrl={SermonService.getFileUrl(sermon, sermon.audio_file)}
                       imageUrl={SermonService.getFileUrl(sermon, sermon.cover_image)}
+                      onDelete={() => handleDeleteClick(sermon.id, sermon.title)}
                     />
                   ))}
                 </div>

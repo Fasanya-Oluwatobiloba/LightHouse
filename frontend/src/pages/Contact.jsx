@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiMail, FiClock, FiSend } from 'react-icons/fi';
 import WaveDivider from '../components/WaveDivider';
 
 export default function Contact() {
@@ -23,7 +23,6 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      // Simulate form submission
       await new Promise(resolve => setTimeout(resolve, 1500));
       setSubmitStatus('success');
       setFormData({
@@ -40,10 +39,11 @@ export default function Contact() {
   };
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden bg-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 to-purple-800 text-white py-32">
-        <div className="container mx-auto px-6 text-center">
+      <section className="relative bg-gradient-to-br from-indigo-900 to-purple-800 text-white py-32">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+        <div className="container mx-auto px-6 text-center relative z-10">
           <motion.h1 
             className="text-4xl md:text-6xl font-bold mb-6"
             initial={{ opacity: 0, y: 20 }}
@@ -52,12 +52,12 @@ export default function Contact() {
             Contact Us
           </motion.h1>
           <motion.p 
-            className="text-xl md:text-2xl max-w-3xl mx-auto"
+            className="text-xl md:text-2xl max-w-3xl mx-auto opacity-90"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            We'd love to hear from you
+            We'd love to hear from you and answer any questions
           </motion.p>
         </div>
         <WaveDivider />
@@ -72,26 +72,34 @@ export default function Contact() {
               className="lg:w-1/2 mb-12 lg:mb-0"
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
               <h2 className="text-3xl font-bold mb-8">Send Us a Message</h2>
               
               {submitStatus === 'success' && (
-                <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                <motion.div
+                  className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
                   Thank you! Your message has been sent successfully.
-                </div>
+                </motion.div>
               )}
               
               {submitStatus === 'error' && (
-                <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                <motion.div
+                  className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
                   There was an error sending your message. Please try again.
-                </div>
+                </motion.div>
               )}
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                     Your Name
                   </label>
                   <input
@@ -101,12 +109,12 @@ export default function Contact() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
                   </label>
                   <input
@@ -116,12 +124,12 @@ export default function Contact() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
                     Subject
                   </label>
                   <input
@@ -131,12 +139,12 @@ export default function Contact() {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                     Message
                   </label>
                   <textarea
@@ -146,7 +154,7 @@ export default function Contact() {
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   ></textarea>
                 </div>
                 
@@ -154,8 +162,13 @@ export default function Contact() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`w-full py-3 px-4 rounded-lg font-medium ${isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
+                    className={`w-full py-4 px-6 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2 ${
+                      isSubmitting 
+                        ? 'bg-indigo-400' 
+                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
+                    }`}
                   >
+                    <FiSend />
                     {isSubmitting ? 'Sending...' : 'Send Message'}
                   </button>
                 </div>
@@ -164,21 +177,21 @@ export default function Contact() {
             
             {/* Contact Info */}
             <motion.div 
-              className="lg:w-1/2 bg-gray-50 p-8 rounded-xl"
+              className="lg:w-1/2 bg-white p-8 md:p-10 rounded-2xl shadow-xl"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
               <h2 className="text-3xl font-bold mb-8">Get In Touch</h2>
               
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    <FiMapPin className="h-6 w-6 text-blue-600" />
+                  <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg">
+                    <FiMapPin className="h-6 w-6 text-indigo-600" />
                   </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Our Location</h3>
+                  <div className="ml-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Our Location</h3>
                     <p className="text-gray-600">
                       123 Church Street<br />
                       Cityville, ST 12345
@@ -187,11 +200,11 @@ export default function Contact() {
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    <FiPhone className="h-6 w-6 text-blue-600" />
+                  <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg">
+                    <FiPhone className="h-6 w-6 text-indigo-600" />
                   </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Phone</h3>
+                  <div className="ml-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Phone</h3>
                     <p className="text-gray-600">
                       Main Office: (123) 456-7890<br />
                       Prayer Line: (123) 456-7891
@@ -200,24 +213,24 @@ export default function Contact() {
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    <FiMail className="h-6 w-6 text-blue-600" />
+                  <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg">
+                    <FiMail className="h-6 w-6 text-indigo-600" />
                   </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Email</h3>
+                  <div className="ml-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Email</h3>
                     <p className="text-gray-600">
-                      General: info@church.org<br />
-                      Support: help@church.org
+                      General: info@lighthousemedia.org<br />
+                      Support: help@lighthousemedia.org
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    <FiClock className="h-6 w-6 text-blue-600" />
+                  <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg">
+                    <FiClock className="h-6 w-6 text-indigo-600" />
                   </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Service Times</h3>
+                  <div className="ml-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Service Times</h3>
                     <p className="text-gray-600">
                       Sunday: 8:30 AM & 11:00 AM<br />
                       Wednesday Bible Study: 7:00 PM
@@ -227,16 +240,22 @@ export default function Contact() {
               </div>
               
               <div className="mt-12">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Follow Us</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-6">Follow Us</h3>
                 <div className="flex space-x-4">
-                  {['Facebook', 'Twitter', 'Instagram', 'YouTube'].map((social) => (
-                    <a 
-                      key={social}
+                  {[
+                    { icon: 'Facebook', color: 'bg-blue-600 hover:bg-blue-700' },
+                    { icon: 'Twitter', color: 'bg-blue-400 hover:bg-blue-500' },
+                    { icon: 'Instagram', color: 'bg-pink-600 hover:bg-pink-700' },
+                    { icon: 'YouTube', color: 'bg-red-600 hover:bg-red-700' }
+                  ].map((social, index) => (
+                    <motion.a
+                      key={index}
                       href="#"
-                      className="w-10 h-10 bg-white rounded-full shadow flex items-center justify-center text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                      className={`w-12 h-12 ${social.color} text-white rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all`}
+                      whileHover={{ y: -3 }}
                     >
-                      {social[0]}
-                    </a>
+                      {social.icon[0]}
+                    </motion.a>
                   ))}
                 </div>
               </div>
@@ -246,12 +265,19 @@ export default function Contact() {
       </section>
       
       {/* Map Section */}
-      <section className="py-0">
-        <div className="h-96 w-full bg-gray-300">
-          {/* In a real app, you would embed a Google Map here */}
-          <div className="h-full w-full flex items-center justify-center text-gray-500">
-            <p>Google Map would be embedded here</p>
-          </div>
+      <section className="pb-20">
+        <div className="container mx-auto px-6">
+          <motion.div
+            className="h-96 w-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="h-full w-full flex items-center justify-center text-gray-500">
+              <p>Google Map would be embedded here</p>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>

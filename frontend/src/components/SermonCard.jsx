@@ -1,3 +1,4 @@
+// components/SermonCard.jsx
 import { useState } from 'react';
 import { FiTrash2, FiDownload } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,6 +7,17 @@ import { motion } from 'framer-motion';
 
 export default function SermonCard({ sermon, audioUrl, imageUrl, onDelete }) {
     const { isAuthenticated } = useAuth();
+    
+    const handleDownload = (e) => {
+        e.preventDefault();
+        // Create a temporary anchor element to trigger download
+        const link = document.createElement('a');
+        link.href = audioUrl;
+        link.download = `${sermon.title.replace(/\s+/g, '_')}.${audioUrl.split('.').pop()}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
     
     return (
         <motion.div 
@@ -49,14 +61,13 @@ export default function SermonCard({ sermon, audioUrl, imageUrl, onDelete }) {
                 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                    <a 
-                        href={audioUrl} 
-                        download
+                    <button 
+                        onClick={handleDownload}
                         className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm"
                     >
                         <FiDownload className="h-4 w-4" />
                         Download
-                    </a>
+                    </button>
                     
                     {isAuthenticated && (
                         <button 
